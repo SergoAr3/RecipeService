@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "recipesApi"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "sergo"
+
+  app:
+    build: ../../../recipe_service/recipe_service
+    env_file:
+      - ../../../recipe_service/recipe_service/.env
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+
+
+
