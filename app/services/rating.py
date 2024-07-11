@@ -1,12 +1,15 @@
-from fastapi import HTTPException
+from fastapi import Depends
 
 from app.repositories.rating import RatingRepository
 from app.repositories.recipe import RecipeRepository
-from app.schemas.rating import RatingRead
+from app.schemas.rating import RatingRead, RatingCreate
 
 
 class RatingService:
-    def __init__(self, rating_repository: RatingRepository, recipe_repository: RecipeRepository):
+    def __init__(self,
+                 rating_repository: RatingRepository = Depends(),
+                 recipe_repository: RecipeRepository = Depends()
+                 ):
         self.rating_repository = rating_repository
         self.recipe_repository = recipe_repository
 
@@ -15,9 +18,8 @@ class RatingService:
         rating = RatingRead.from_orm(rating)
         return rating
 
-    async def create_rating(self, user_rating: int, user_id: int, recipe_title: str) -> None:
-        if user_rating > 5:
-            raise HTTPException(status_code=400, detail="Оценка должна быть не выше 5!")
+    async def create_rating(self, user_rating: RatingCreate, user_id: int, recipe_title: str) -> None:
+        user_rating = user_rating.rating
         await self.rating_repository.create(user_rating, user_id, recipe_title)
 
         ratings = await self.rating_repository.get(recipe_title=recipe_title)

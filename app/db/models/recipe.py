@@ -1,10 +1,9 @@
-from sqlalchemy import ForeignKey, String
+import datetime
+
+from sqlalchemy import String, Interval
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.db import Base
-
-
-# from schemas.tasks import TaskSchema
 
 
 class Recipe(Base):
@@ -12,7 +11,7 @@ class Recipe(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String(50))
     description: Mapped[str] = mapped_column(String(100))
-    total_time: Mapped[int] = mapped_column(default=0)
+    total_time: Mapped[datetime.timedelta] = mapped_column(Interval(), default=datetime.timedelta(seconds=0), )
     average_rating: Mapped[float] = mapped_column(default=0.0)
     image_url: Mapped[str] = mapped_column(String(255), nullable=True)
 

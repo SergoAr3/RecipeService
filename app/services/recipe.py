@@ -1,4 +1,7 @@
+import datetime
 from typing import List
+
+from fastapi import Depends
 
 from app.db import Recipe
 from app.repositories.ingredient import IngredientRepository
@@ -9,8 +12,10 @@ from app.schemas.recipe import RecipeCreate, RecipeRead
 
 
 class RecipeService:
-    def __init__(self, recipe_repository: RecipeRepository, ingredient_repository: IngredientRepository,
-                 step_repository: StepRepository, rating_repository: RatingRepository):
+    def __init__(self, recipe_repository: RecipeRepository = Depends(),
+                 ingredient_repository: IngredientRepository = Depends(),
+                 step_repository: StepRepository = Depends(),
+                 rating_repository: RatingRepository = Depends()):
         self.recipe_repository = recipe_repository
         self.ingredient_repository = ingredient_repository
         self.step_repository = step_repository
@@ -93,15 +98,18 @@ class RecipeService:
             recipes.append(str(RecipeRead.from_orm(recipe_data)))
         return recipes
 
-    async def get_by_total_time(self, min_time: int = None, max_time: int = None, sort_by_time: bool = False,
+    async def get_by_total_time(self, min_time: datetime.timedelta = None, max_time: datetime.timedelta = None,
+                                sort_by_time: bool = False,
                                 descending: bool = False):
         recipes = []
         db_recipes = []
-        if min_time is not None:
-            db_recipes = await self.recipe_repository.get_by_min_total_time(min_time)
-        if max_time is not None:
-            db_recipes = await self.recipe_repository.get_by_max_total_time(max_time)
-        if sort_by_time:
+        if min_time and max_time:
+            db_recipes = await self.recipe_repository.get_time_filter(min_time=min_time, max_time=max_time)
+        elif min_time:
+            db_recipes = await self.recipe_repository.get_time_filter(min_time=min_time)
+        elif max_time:
+            db_recipes = await self.recipe_repository.get_time_filter(max_time=max_time)
+        elif sort_by_time:
             if descending:
                 db_recipes = await self.recipe_repository.get_sort_by_time(descending=True)
             else:
@@ -126,19 +134,22 @@ class RecipeService:
             return 'No recipes found'
         return recipes
 
-    async def get_by_average_rating(self, min_rate: int = None, max_rate: int = None, sort_by_rating: bool = False,
+    async def get_by_average_rating(self, min_rating: float = None, max_rating: float = None,
+                                    sort_by_rating: bool = False,
                                     descending: bool = False):
         recipes = []
         db_recipes = []
-        if min_rate is not None:
-            db_recipes = await self.recipe_repository.get_by_min_average_rating(min_rate)
-        elif max_rate is not None:
-            db_recipes = await self.recipe_repository.get_by_max_average_rating(max_rate)
+        if min_rating and max_rating:
+            db_recipes = await self.recipe_repository.get_rating_filter(min_rating=min_rating, max_rating=max_rating)
+        elif min_rating:
+            db_recipes = await self.recipe_repository.get_rating_filter(min_rating=min_rating)
+        elif max_rating:
+            db_recipes = await self.recipe_repository.get_rating_filter(max_rating=max_rating)
         elif sort_by_rating:
             if descending:
-                db_recipes = await self.recipe_repository.get_sort_by_time(descending=True)
+                db_recipes = await self.recipe_repository.get_sort_by_average_rating(descending=True)
             else:
-                db_recipes = await self.recipe_repository.get_sort_by_time()
+                db_recipes = await self.recipe_repository.get_sort_by_average_rating()
 
         for db_recipe in db_recipes:
             recipe_ingredients = await self.ingredient_repository.get(db_recipe.id, by_recipe_id=True)

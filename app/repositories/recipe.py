@@ -1,20 +1,24 @@
+import datetime
 from typing import List
+
+from fastapi import Depends
 
 from sqlalchemy import select, update, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import Recipe
+from app.db.db import get_db
 from app.schemas.recipe import RecipeCreate
 
 
 class RecipeRepository:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession = Depends(get_db)):
         self.db = db
 
     async def get_last(self) -> Recipe:
         stmt = select(Recipe)
         res = await self.db.execute(stmt)
-        recipes = res.scalars().first()
+        recipes = res.scalar()
         return recipes
 
     async def get_all(self) -> List[Recipe]:
@@ -29,17 +33,18 @@ class RecipeRepository:
         else:
             stmt = select(Recipe).where(Recipe.id == recipe_id)
         res = await self.db.execute(stmt)
-        recipe = res.scalars().first()
+        recipe = res.scalar()
         return recipe
 
-    async def get_by_min_total_time(self, min_time: int) -> List[Recipe]:
-        stmt = select(Recipe).where(Recipe.total_time >= min_time)
-        res = await self.db.execute(stmt)
-        recipe = res.scalars().all()
-        return recipe
-
-    async def get_by_max_total_time(self, max_time: int) -> List[Recipe]:
-        stmt = select(Recipe).where(Recipe.total_time <= max_time)
+    async def get_time_filter(self, min_time: datetime.timedelta = None, max_time: datetime.timedelta = None) -> List[
+        Recipe]:
+        stmt = None
+        if min_time and max_time:
+            stmt = select(Recipe).where(min_time <= Recipe.total_time, Recipe.total_time <= max_time)
+        elif min_time:
+            stmt = select(Recipe).where(Recipe.total_time >= min_time)
+        elif max_time:
+            stmt = select(Recipe).where(Recipe.total_time <= max_time)
         res = await self.db.execute(stmt)
         recipe = res.scalars().all()
         return recipe
@@ -53,14 +58,14 @@ class RecipeRepository:
         recipe = res.scalars().all()
         return recipe
 
-    async def get_by_min_average_rating(self, min_rate: int) -> List[Recipe]:
-        stmt = select(Recipe).where(Recipe.average_rating >= min_rate)
-        res = await self.db.execute(stmt)
-        recipe = res.scalars().all()
-        return recipe
-
-    async def get_by_max_average_rating(self, max_rate: int) -> List[Recipe]:
-        stmt = select(Recipe).where(Recipe.average_rating <= max_rate)
+    async def get_rating_filter(self, min_rating: float = None, max_rating: float = None) -> List[Recipe]:
+        stmt = None
+        if min_rating and max_rating:
+            stmt = select(Recipe).where(Recipe.average_rating >= min_rating, Recipe.average_rating <= max_rating)
+        elif min_rating:
+            stmt = select(Recipe).where(Recipe.average_rating >= min_rating)
+        elif max_rating:
+            stmt = select(Recipe).where(Recipe.average_rating <= max_rating)
         res = await self.db.execute(stmt)
         recipe = res.scalars().all()
         return recipe
@@ -78,7 +83,7 @@ class RecipeRepository:
         db_recipe = Recipe(
             title=recipe.title,
             description=recipe.description,
-            total_time=sum(step.step_time for step in recipe.steps)
+            total_time=sum([step.step_time for step in recipe.steps], datetime.timedelta(0))
         )
         self.db.add(db_recipe)
         return db_recipe

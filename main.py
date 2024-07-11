@@ -18,7 +18,11 @@ app.include_router(
     tags=["auth"],
 )
 
-app.include_router(recipe_router)
+app.include_router(
+    recipe_router,
+    prefix="/recipe",
+    tags=["recipe"],
+)
 
 if __name__ == '__main__':
     uvicorn.run('main:app', port=8000, workers=2, log_level="info", reload=True)

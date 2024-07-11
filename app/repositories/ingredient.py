@@ -1,14 +1,16 @@
 from typing import List
 
+from fastapi import Depends
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import Ingredient
+from app.db.db import get_db
 from app.schemas.ingredient import IngredientCreate
 
 
 class IngredientRepository:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession = Depends(get_db)):
         self.db = db
 
     async def get_all(self) -> list[Ingredient]:
@@ -26,7 +28,7 @@ class IngredientRepository:
         else:
             stmt = select(Ingredient).where(Ingredient.id == condition)
             res = await self.db.execute(stmt)
-            ingredient = res.scalars().first()
+            ingredient = res.scalar()
             return ingredient
         res = await self.db.execute(stmt)
         ingredients = res.scalars().all()

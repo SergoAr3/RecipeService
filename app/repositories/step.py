@@ -1,24 +1,26 @@
+from fastapi import Depends
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import Step
+from app.db.db import get_db
 from app.schemas.step import StepCreate
 
 
 class StepRepository:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession = Depends(get_db)):
         self.db = db
 
     async def get_all(self, recipe_id: int) -> list[Step]:
         stmt = select(Step).where(Step.recipe_id == recipe_id)
         res = await self.db.execute(stmt)
-        recipes = res.scalars().all()
-        return recipes
+        steps = res.scalars().all()
+        return steps
 
     async def get(self, recipe_id: int, number: int) -> Step:
         stmt = select(Step).where(Step.recipe_id == recipe_id, Step.number == number)
         res = await self.db.execute(stmt)
-        step = res.scalars().first()
+        step = res.scalar()
         return step
 
     async def create(self, step: StepCreate, recipe_id: int) -> Step:

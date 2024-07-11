@@ -1,8 +1,8 @@
 """
 
-Revision ID: b1680e805ecb
+Revision ID: 4be49944df9e
 Revises: 
-Create Date: 2024-07-08 00:33:21.030837
+Create Date: 2024-07-11 19:01:15.785915
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'b1680e805ecb'
+revision = '4be49944df9e'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,19 +22,21 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('title', sa.String(length=50), nullable=False),
     sa.Column('description', sa.String(length=100), nullable=False),
-    sa.Column('total_time', sa.Integer(), nullable=False),
+    sa.Column('total_time', sa.Interval(), nullable=False),
     sa.Column('average_rating', sa.Float(), nullable=False),
+    sa.Column('image_url', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('role',
+    role_guide_table = op.create_table('role_guide',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=10), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
+    op.bulk_insert(role_guide_table, [{'id': 1, 'name': 'user'}, {'id': 2, 'name': 'admin'}])
     op.create_table('ingredient',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=False),
-    sa.Column('quantity', sa.String(), nullable=False),
+    sa.Column('name', sa.String(length=50), nullable=False),
+    sa.Column('quantity', sa.String(length=255), nullable=False),
     sa.Column('recipe_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['recipe_id'], ['recipe.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
@@ -42,8 +44,9 @@ def upgrade() -> None:
     op.create_table('step',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('number', sa.Integer(), nullable=False),
-    sa.Column('description', sa.String(), nullable=False),
-    sa.Column('step_time', sa.Integer(), nullable=False),
+    sa.Column('description', sa.String(length=255), nullable=False),
+    sa.Column('step_time', sa.Interval(), nullable=False),
+    sa.Column('image_url', sa.String(length=255), nullable=True),
     sa.Column('recipe_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['recipe_id'], ['recipe.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
@@ -57,7 +60,7 @@ def upgrade() -> None:
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('is_superuser', sa.Boolean(), nullable=False),
     sa.Column('is_verified', sa.Boolean(), nullable=False),
-    sa.ForeignKeyConstraint(['role_id'], ['role.id'], ),
+    sa.ForeignKeyConstraint(['role_id'], ['role_guide.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
@@ -66,9 +69,10 @@ def upgrade() -> None:
     sa.Column('rating', sa.Float(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('recipe_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['recipe_id'], ['recipe.id'], ),
+    sa.ForeignKeyConstraint(['recipe_id'], ['recipe.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
-    sa.PrimaryKeyConstraint('id', 'user_id', 'recipe_id')
+    sa.PrimaryKeyConstraint('id', 'user_id', 'recipe_id'),
+    sa.UniqueConstraint('user_id', 'recipe_id', name='uniq_user_recipe')
     )
     # ### end Alembic commands ###
 
@@ -80,6 +84,6 @@ def downgrade() -> None:
     op.drop_table('user')
     op.drop_table('step')
     op.drop_table('ingredient')
-    op.drop_table('role')
+    op.drop_table('role_guide')
     op.drop_table('recipe')
     # ### end Alembic commands ###

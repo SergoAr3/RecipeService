@@ -1,13 +1,15 @@
 from typing import List
 
+from fastapi import Depends
+
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import Rating, Recipe
-
+from app.db.db import get_db
 
 class RatingRepository:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession = Depends(get_db)):
         self.db = db
 
     async def get(self, recipe_id: int = None, recipe_title: str = None, by_recipe_id: bool = False) -> List[Rating]:
@@ -21,9 +23,9 @@ class RatingRepository:
         ratings = res.scalars().all()
         return ratings
 
-    async def create(self, rating: int, user_id: int, recipe_title: str) -> Rating:
+    async def create(self, rating: float, user_id: int, recipe_title: str) -> Rating:
         recipe = await self.db.execute(select(Recipe).where(Recipe.title == recipe_title))
-        recipe = recipe.scalars().first()
+        recipe = recipe.scalar()
         db_rating = Rating(
             rating=rating,
             user_id=user_id,
@@ -31,7 +33,7 @@ class RatingRepository:
         )
         rating_exists = await self.db.execute(select(Rating).where(Rating.user_id == db_rating.user_id,
                                                                    Rating.recipe_id == db_rating.recipe_id))
-        rating_exists = rating_exists.scalars().first()
+        rating_exists = rating_exists.scalar()
         if not rating_exists:
             self.db.add(db_rating)
         else:

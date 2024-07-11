@@ -1,14 +1,17 @@
 from os import getenv
 from dotenv import load_dotenv
+from fastapi import Depends
 
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
+from app.repositories.google_drive.config import get_gd
+
 load_dotenv()
 
 
-class GoogleDriveService:
-    def __init__(self, gd: build):
+class GoogleDriveRepository:
+    def __init__(self, gd: build = Depends(get_gd)):
         self.gd = gd
 
     def upload_image(self, image_name: str, image_path) -> str:
