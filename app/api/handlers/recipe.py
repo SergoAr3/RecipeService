@@ -21,7 +21,7 @@ current_user = fastapi_users.current_user()
 async def upload_image(
         recipe_title: str,
         file: UploadFile,
-        google_drive_repository: Annotated[GoogleDriveService, Depends()],
+        google_drive_repository: Annotated[GoogleDriveRepository, Depends()],
         recipe_service: Annotated[RecipeService, Depends()],
         user: User = Depends(current_user)
 ):
