@@ -17,4 +17,4 @@ class StepService:
         return step
 
     async def create_step(self, step: StepCreate, recipe_id: int) -> None:
-        db_step = await self.step_repository.create(step, recipe_id)
+        await self.step_repository.create(step, recipe_id)

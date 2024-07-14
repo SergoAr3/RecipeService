@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db import Rating, Recipe
 from app.db.db import get_db
 
+
 class RatingRepository:
     def __init__(self, db: AsyncSession = Depends(get_db)):
         self.db = db
@@ -41,11 +42,3 @@ class RatingRepository:
                                                        Rating.recipe_id == db_rating.recipe_id).values(
                 rating=rating))
         return db_rating
-
-    # async def delete(self, rating: RatingCreate) -> None:
-    #     await self.db.delete(rating)
-    #
-    # async def update(self, step: StepCreate, recipe_id: int) -> None:
-    #     await self.db.execute(update(Step).where(Step.recipe_id == recipe_id).values(number=step.number,
-    #                                                                                  description=step.description,
-    #                                                                                  step_time=step.step_time))

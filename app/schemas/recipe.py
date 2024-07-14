@@ -16,6 +16,17 @@ class RecipeBase(BaseModel):
     class Config:
         from_attributes = True
 
+
+class RecipeRead(RecipeBase):
+    id: int
+    total_time: datetime.timedelta
+    average_rating: float
+
+    @field_serializer('total_time')
+    @classmethod
+    def serialize_total_time(cls, value):
+        return str(value)
+
     def __str__(self):
         return (f'Блюдо: {self.title},\n'
                 f'Описание: {self.description},\n '
@@ -23,20 +34,7 @@ class RecipeBase(BaseModel):
                 f'Ингредиенты: {[str(ingredient) for ingredient in self.ingredients]},\n '
                 f'Шаги приготовления: {[str(step) for step in self.steps]}\n\n'
                 f'Средняя оценка: {self.average_rating}'
-                f'Фото: {self.image_url}'
                 )
-
-
-class RecipeRead(RecipeBase):
-    id: int
-    total_time: datetime.timedelta
-    average_rating: float
-    image_url: str | None
-
-    @field_serializer('total_time')
-    @classmethod
-    def serialize_total_time(cls, value):
-        return str(value)
 
 
 class RecipeCreate(RecipeBase):

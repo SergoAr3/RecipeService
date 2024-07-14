@@ -11,4 +11,4 @@ class Ingredient(Base):
     quantity: Mapped[int] = mapped_column(String(255))
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id", ondelete="CASCADE"))
 
-    recipe = relationship("Recipe", back_populates="ingredient")
+    recipe = relationship("Recipe", back_populates="ingredients")

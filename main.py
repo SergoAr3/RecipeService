@@ -1,27 +1,21 @@
 import uvicorn
 from fastapi import FastAPI
 
-from app.api.handlers.auth import register_router, auth_router
 from app.api.handlers.recipe import recipe_router
+from app.auth.handlers import auth_router
 
 app = FastAPI(docs_url="/")
 
 app.include_router(
     auth_router,
-    prefix="/auth/jwt",
-    tags=["auth"],
-)
-
-app.include_router(
-    register_router,
     prefix="/auth",
-    tags=["auth"],
+    tags=["Auth"],
 )
 
 app.include_router(
     recipe_router,
     prefix="/recipe",
-    tags=["recipe"],
+    tags=["Recipe"],
 )
 
 if __name__ == '__main__':

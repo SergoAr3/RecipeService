@@ -15,4 +15,3 @@ class Rating(Base):
     user = relationship("User", back_populates="rating")
 
     __table_args__ = (UniqueConstraint('user_id', 'recipe_id', name='uniq_user_recipe'),)
-

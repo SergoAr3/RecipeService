@@ -19,8 +19,8 @@ class IngredientRepository:
         recipes = res.scalars().all()
         return recipes
 
-    async def get(self, condition: int | str, by_recipe_id: bool = False, by_name: bool = False) -> Ingredient | List[
-        Ingredient]:
+    async def get(self, condition: int | str,
+                  by_recipe_id: bool = False, by_name: bool = False) -> Ingredient | List[Ingredient]:
         if by_recipe_id:
             stmt = select(Ingredient).where(Ingredient.recipe_id == condition)
         elif by_name:

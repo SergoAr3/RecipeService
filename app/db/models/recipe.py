@@ -13,8 +13,8 @@ class Recipe(Base):
     description: Mapped[str] = mapped_column(String(100))
     total_time: Mapped[datetime.timedelta] = mapped_column(Interval(), default=datetime.timedelta(seconds=0), )
     average_rating: Mapped[float] = mapped_column(default=0.0)
-    image_url: Mapped[str] = mapped_column(String(255), nullable=True)
 
-    ingredient = relationship("Ingredient", back_populates="recipe", cascade="all, delete-orphan")
-    step = relationship("Step", back_populates="recipe", cascade="all, delete-orphan")
-    rating = relationship("Rating", back_populates="recipe")
+    ingredients = relationship("Ingredient", back_populates="recipe", cascade="all, delete-orphan", lazy="selectin")
+    steps = relationship("Step", back_populates="recipe", cascade="all, delete-orphan", lazy="selectin")
+    rating = relationship("Rating", back_populates="recipe",  lazy="selectin")
+    image = relationship("Image", back_populates="recipe",  lazy="selectin")

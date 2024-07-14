@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import Depends
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,7 +38,7 @@ class StepRepository:
     async def delete(self, step: StepCreate) -> None:
         await self.db.delete(step)
 
-    async def update(self, step: StepCreate, recipe_id: int, step_description: str) -> None:
+    async def update(self, step: StepCreate, step_description: str) -> None:
         await self.db.execute(
             update(Step).where(Step.description == step_description).values(
                 number=step.number,
