@@ -1,8 +1,10 @@
 import datetime
-from typing import List
+from typing import List, Literal
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
+from starlette import status
 
+import app.api.constants.status_codes as status_codes
 from app.db import Recipe
 from app.repositories.ingredient import IngredientRepository
 from app.repositories.rating import RatingRepository
@@ -66,18 +68,23 @@ class RecipeService:
 
     async def get_filtered_recipes(
             self,
-            ingredient_name: str,
-            min_time: datetime.timedelta,
-            max_time: datetime.timedelta,
-            max_rating: float,
-            min_rating: float,
-            sort_time: str,
-            sort_rating: str
+            ingredient_name: str | None,
+            min_time: datetime.timedelta | None,
+            max_time: datetime.timedelta | None,
+            max_rating: float | None,
+            min_rating: float | None,
+            sort_time: Literal['desc', 'asc'] | None,
+            sort_rating: Literal['desc', 'asc'] | None
     ) -> list[str]:
         recipes_id = []
-        ingredients = await self.ingredient_repository.get(ingredient_name, by_name=True)
-        for ingredient in ingredients:
-            recipes_id.append(ingredient.recipe_id)
+        if ingredient_name:
+            ingredients = await self.ingredient_repository.get(ingredient_name, by_name=True)
+            if ingredients:
+                for ingredient in ingredients:
+                    recipes_id.append(ingredient.recipe_id)
+            else:
+                raise status_codes.HTTP_404_NOT_FOUND_ingredient
+
         filtered_recipes = await self.recipe_repository.get_filtered_recipes(
             ingredient_name=ingredient_name,
             max_time=max_time,
@@ -92,6 +99,8 @@ class RecipeService:
 
     async def create_recipe_name(self, recipe: RecipeCreate) -> Recipe:
         db_recipe = await self.recipe_repository.create(recipe)
+        if not db_recipe:
+            raise status_codes.HTTP_409_CONFLICT_created
         return db_recipe
 
     async def create_recipe(self, recipe: RecipeCreate) -> None:
@@ -102,12 +111,15 @@ class RecipeService:
         for step in recipe.steps:
             await self.step_repository.create(step, db_recipe.id)
 
-    async def delete_recipe(self, recipe_id: int) -> None:
+    async def delete_recipe(self, recipe_id: int) -> Recipe:
         recipe = await self.recipe_repository.get(recipe_id)
         if recipe:
             await self.recipe_repository.delete(recipe)
+            return recipe
+        else:
+            raise status_codes.HTTP_404_NOT_FOUND_recipe
 
-    async def update_recipe(self, recipe: RecipeCreate, recipe_id: int) -> None:
+    async def update_recipe(self, recipe: RecipeCreate, recipe_id: int) -> Recipe:
         db_recipe = await self.recipe_repository.get(recipe_id)
         if db_recipe:
             ingredients = recipe.ingredients
@@ -117,3 +129,4 @@ class RecipeService:
             for step in steps:
                 await self.step_repository.update(step, step.description)
             await self.recipe_repository.update(recipe, recipe_id)
+        return db_recipe

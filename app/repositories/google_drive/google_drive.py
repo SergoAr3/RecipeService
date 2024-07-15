@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from fastapi import Depends
 
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
+from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload,MediaIoBaseUpload
 
 from app.repositories.google_drive.config import get_gd
 
@@ -15,7 +15,7 @@ class GoogleDriveRepository:
     def __init__(self, gd: build = Depends(get_gd)):
         self.gd = gd
 
-    def upload_image(self, image_name: str, image_path) -> str:
+    def upload_image(self, image_name: str, image_path: str) -> str:
         media = MediaFileUpload(image_path, resumable=True)
         file_metadata = {
             'name': image_name,
@@ -25,10 +25,11 @@ class GoogleDriveRepository:
 
         return file_id['id']
 
-    def download_image(self, image_id: str, recipe_title: str) -> None:
+    async def download_image(self, image_id: str) -> io.BytesIO:
         image = self.gd.files().get_media(fileId=image_id)
-        with io.FileIO(f'{recipe_title}.jpg', 'wb') as fh:
-            downloader = MediaIoBaseDownload(fh, image)
-            done = False
-            while done is False:
-                status, done = downloader.next_chunk()
+        image_stream = io.BytesIO()
+        downloader = MediaIoBaseDownload(image_stream, image)
+        done = False
+        while done is False:
+            status, done = downloader.next_chunk()
+        return image_stream

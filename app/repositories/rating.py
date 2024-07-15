@@ -24,9 +24,11 @@ class RatingRepository:
         ratings = res.scalars().all()
         return ratings
 
-    async def create(self, rating: float, user_id: int, recipe_title: str) -> Rating:
+    async def create(self, rating: float, user_id: int, recipe_title: str) -> Rating | None:
         recipe = await self.db.execute(select(Recipe).where(Recipe.title == recipe_title))
         recipe = recipe.scalar()
+        if not recipe:
+            return None
         db_rating = Rating(
             rating=rating,
             user_id=user_id,

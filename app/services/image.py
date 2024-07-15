@@ -32,4 +32,4 @@ class ImageService:
         return await self.image_repository.get_image_url(recipe_id)
 
     async def get_image_id(self, recipe_id: int) -> str:
-        return await self.image_repository.get_image_url(recipe_id)
+        return await self.image_repository.get_image_id(recipe_id)

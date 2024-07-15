@@ -8,15 +8,19 @@ from app.services.auth import AuthService
 from app.schemas.token import Token
 from app.schemas.user import UserCreate
 
+import app.api.constants.status_codes as status_codes
+
+
 auth_router = APIRouter()
 
 
-@auth_router.post('/', status_code=status.HTTP_201_CREATED)
-async def create_user(
+@auth_router.post('/register', status_code=status.HTTP_201_CREATED)
+async def register(
         user: UserCreate,
         auth_service: Annotated[AuthService, Depends()],
 ):
     await auth_service.create_user_db(user)
+    return status_codes.HTTP_200_OK_register
 
 
 @auth_router.post('/login', response_model=Token)

@@ -4,10 +4,10 @@ from pydantic import BaseModel, Field, field_validator, field_serializer
 
 
 class StepBase(BaseModel):
-    number: int
-    description: str
+    number: int = Field(description='Номер шага', example=1)
+    description: str = Field(description='Описание шага', example='Порезать мелко овощи')
     step_time: datetime.timedelta = Field(description='Длительность шага в формате HH:MM:SS',
-                                          example=datetime.time(microsecond=0))
+                                          example=datetime.time(minute=10))
 
     @field_validator('step_time', mode='before')
     @classmethod

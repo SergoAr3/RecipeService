@@ -1,17 +1,18 @@
 import datetime
 from typing import List
 
-from pydantic import BaseModel, field_serializer
+from pydantic import BaseModel, field_serializer, Field
 
 from app.schemas.ingredient import IngredientCreate
 from app.schemas.step import StepCreate
 
 
 class RecipeBase(BaseModel):
-    title: str
-    description: str
-    ingredients: List[IngredientCreate]
-    steps: List[StepCreate]
+    title: str = Field(description='Название рецепта', example='Овощной салат')
+    description: str = Field(description='Описание рецепта',
+                             example='Это легкое и освежающее блюдо, состоящее из свежих овощей')
+    ingredients: List[IngredientCreate] = Field(description='Список ингредиентов')
+    steps: List[StepCreate] = Field(description='Шаги приготовления')
 
     class Config:
         from_attributes = True

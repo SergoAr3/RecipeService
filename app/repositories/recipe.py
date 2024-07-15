@@ -49,10 +49,12 @@ class RecipeRepository:
     ) -> list[Recipe]:
         stmt = select(Recipe)
         if ingredient_name:
+            print(ingredient_name)
             conditions = []
             for recipe_id in recipes_id:
                 conditions.append(Recipe.id == recipe_id)
             stmt = stmt.where(or_(*conditions))
+
         if min_time and max_time:
             stmt = stmt.where(Recipe.total_time >= min_time, Recipe.total_time <= max_time)
         elif min_time:
@@ -76,10 +78,14 @@ class RecipeRepository:
             elif sort_rating == 'asc':
                 stmt = stmt.order_by(Recipe.average_rating)
         res = await self.db.execute(stmt)
+        print(stmt)
         recipes = res.scalars().all()
         return recipes
 
-    async def create(self, recipe_data: RecipeCreate) -> Recipe:
+    async def create(self, recipe_data: RecipeCreate) -> Recipe | None:
+        check_recipe = await self.get(title=recipe_data.title, by_title=True)
+        if check_recipe:
+            return None
         recipe = Recipe(
             title=recipe_data.title,
             description=recipe_data.description,
