@@ -3,12 +3,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from starlette import status
 
-from app.auth.utils import validate_auth_user, encode_jwt
-from app.services.auth import AuthService
+import app.api.errors.level_200 as msg
+from app.auth.utils import encode_jwt, validate_auth_user
 from app.schemas.token import Token
 from app.schemas.user import UserCreate
-
-import app.api.constants.status_codes as status_codes
+from app.services.auth import AuthService
 
 
 auth_router = APIRouter()
@@ -20,7 +19,7 @@ async def register(
         auth_service: Annotated[AuthService, Depends()],
 ):
     await auth_service.create_user_db(user)
-    return status_codes.HTTP_200_OK_register
+    return msg.HTTP_200_OK_register
 
 
 @auth_router.post('/login', response_model=Token)

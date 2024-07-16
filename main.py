@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from app.api.handlers.recipe import recipe_router
 from app.auth.handlers import auth_router
 
+
 app = FastAPI(docs_url="/")
 
 app.include_router(

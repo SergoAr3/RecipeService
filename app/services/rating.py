@@ -3,7 +3,7 @@ from fastapi import Depends
 from app.db import Rating
 from app.repositories.rating import RatingRepository
 from app.repositories.recipe import RecipeRepository
-from app.schemas.rating import RatingRead, RatingCreate
+from app.schemas.rating import RatingCreate, RatingRead
 
 
 class RatingService:

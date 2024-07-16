@@ -1,11 +1,10 @@
 from typing import List
 
 from fastapi import Depends
-
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db import Rating, Recipe, Image
+from app.db import Image, Rating, Recipe
 from app.db.db import get_db
 
 
@@ -34,7 +33,8 @@ class ImageRepository:
         return image
 
     async def update(self, current_image_recipe_id: int, image_id: str, image_url: str):
-        await self.db.execute(update(Image).where(Image.recipe_id == current_image_recipe_id).values(id=image_id, url=image_url))
+        await self.db.execute(
+            update(Image).where(Image.recipe_id == current_image_recipe_id).values(id=image_id, url=image_url))
 
     async def get_image_url(self, recipe_id: int) -> str:
         stmt = (select(Image.url).where(Image.recipe_id == recipe_id))

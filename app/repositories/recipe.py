@@ -2,8 +2,7 @@ import datetime
 from typing import List
 
 from fastapi import Depends
-
-from sqlalchemy import select, update, desc, or_
+from sqlalchemy import desc, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import Recipe
@@ -49,10 +48,7 @@ class RecipeRepository:
     ) -> list[Recipe]:
         stmt = select(Recipe)
         if ingredient_name:
-            print(ingredient_name)
-            conditions = []
-            for recipe_id in recipes_id:
-                conditions.append(Recipe.id == recipe_id)
+            conditions = [Recipe.id == recipe_id for recipe_id in recipes_id]
             stmt = stmt.where(or_(*conditions))
 
         if min_time and max_time:

@@ -1,16 +1,16 @@
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 from typing import Annotated
 
 import bcrypt
 import jwt
-from fastapi import Form, HTTPException, status, Depends
+from fastapi import Depends, Form, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
 
 from app.db import User
 from app.repositories.user import UserRepository
 from app.schemas.jwt import auth_jwt
 
-from fastapi.security import OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/auth/login/",

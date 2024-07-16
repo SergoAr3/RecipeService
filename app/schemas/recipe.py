@@ -1,7 +1,7 @@
 import datetime
 from typing import List
 
-from pydantic import BaseModel, field_serializer, Field
+from pydantic import BaseModel, Field, field_serializer
 
 from app.schemas.ingredient import IngredientCreate
 from app.schemas.step import StepCreate

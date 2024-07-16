@@ -1,4 +1,4 @@
-from sqlalchemy import String, LargeBinary, Boolean
+from sqlalchemy import Boolean, LargeBinary, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.db import Base

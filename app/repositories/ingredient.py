@@ -47,5 +47,6 @@ class IngredientRepository:
         await self.db.delete(ingredient)
 
     async def update(self, ingredient: IngredientCreate, ingredient_name: str) -> None:
-        await self.db.execute(update(Ingredient).where(Ingredient.name == ingredient_name).values(name=ingredient.name,
-                                                                                                  quantity=ingredient.quantity))
+        await self.db.execute(update(Ingredient)
+                              .where(Ingredient.name == ingredient_name)
+                              .values(name=ingredient.name, quantity=ingredient.quantity))

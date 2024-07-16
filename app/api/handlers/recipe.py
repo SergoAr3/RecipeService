@@ -2,24 +2,23 @@ import datetime
 import shutil
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, UploadFile, Query
+from fastapi import APIRouter, Depends, Query, UploadFile
 from starlette.responses import StreamingResponse
-
-from app.auth.utils import get_current_active_auth_user
-from app.db import User
-from app.schemas.rating import RatingCreate
-from app.schemas.recipe import RecipeCreate
-from app.repositories.google_drive.google_drive import GoogleDriveRepository
-from app.services.image import ImageService
-from app.services.recipe import RecipeService
-from app.services.rating import RatingService
-import app.api.constants.status_codes as status_codes
-
-
 from transliterate import translit
 
-recipe_router = APIRouter()
+import app.api.errors.level_200 as msg
+import app.api.errors.level_400 as err
+from app.auth.utils import get_current_active_auth_user
+from app.db import User
+from app.repositories.google_drive.google_drive import GoogleDriveRepository
+from app.schemas.rating import RatingCreate
+from app.schemas.recipe import RecipeCreate
+from app.services.image import ImageService
+from app.services.rating import RatingService
+from app.services.recipe import RecipeService
 
+
+recipe_router = APIRouter()
 
 
 @recipe_router.get('/image/{recipe_title}')
@@ -33,10 +32,10 @@ async def get_recipe_image(
     try:
         recipe = await recipe_service.get_recipe_by_title(recipe_title)
     except AttributeError:
-        raise status_codes.HTTP_404_NOT_FOUND_recipe
+        raise err.HTTP_404_NOT_FOUND_recipe
     image_id = await image_service.get_image_id(recipe.id)
     if not image_id:
-        raise status_codes.HTTP_404_NOT_FOUND_image
+        raise err.HTTP_404_NOT_FOUND_image
 
     image_stream = await google_drive_repository.download_image(image_id)
 
@@ -45,7 +44,7 @@ async def get_recipe_image(
 
 
 @recipe_router.get('/image/{recipe_title}/download/')
-async def get_recipe_image(
+async def download_recipe_image(
         recipe_title: str,
         image_service: Annotated[ImageService, Depends()],
         recipe_service: Annotated[RecipeService, Depends()],
@@ -55,10 +54,10 @@ async def get_recipe_image(
     try:
         recipe = await recipe_service.get_recipe_by_title(recipe_title)
     except AttributeError:
-        raise status_codes.HTTP_404_NOT_FOUND_recipe
+        raise err.HTTP_404_NOT_FOUND_recipe
     image_id = await image_service.get_image_id(recipe.id)
     if not image_id:
-        raise status_codes.HTTP_404_NOT_FOUND_image
+        raise err.HTTP_404_NOT_FOUND_image
 
     image_stream = await google_drive_repository.download_image(image_id)
     image_stream.seek(0)
@@ -73,7 +72,7 @@ async def get_all_recipes(
 ):
     all_recipes = await recipe_service.get_all_recipes()
     if not all_recipes:
-        raise status_codes.HTTP_204_NO_CONTENT
+        raise msg.HTTP_204_NO_CONTENT
     return all_recipes
 
 
@@ -85,14 +84,14 @@ async def get_recipe(
     try:
         recipe = await recipe_service.get_recipe(recipe_id)
     except AttributeError:
-        raise status_codes.HTTP_404_NOT_FOUND_recipe
+        raise err.HTTP_404_NOT_FOUND_recipe
     return recipe
 
 
 @recipe_router.get('/')
 async def get_recipes_filter(
         recipe_service: Annotated[RecipeService, Depends()],
-        ingredient_name: str | None = None,
+        ingredient_name: Annotated[str | None, Query()] = None,
         min_time: Annotated[
             datetime.timedelta | None, Query(description='HH:MM:SS', example='00:00:00')] = None,
         max_time: Annotated[
@@ -119,9 +118,9 @@ async def delete_recipe(
         recipe_service: Annotated[RecipeService, Depends()],
         user: User = Depends(get_current_active_auth_user),
 ):
-    recipe = await recipe_service.delete_recipe(recipe_id)
+    await recipe_service.delete_recipe(recipe_id)
 
-    return status_codes.HTTP_200_OK_deleted
+    return msg.HTTP_200_OK_deleted
 
 
 @recipe_router.post('/')
@@ -131,7 +130,7 @@ async def create_recipe(
         user: User = Depends(get_current_active_auth_user),
 ):
     await recipe_service.create_recipe(recipe)
-    return status_codes.HTTP_200_OK_created
+    return msg.HTTP_200_OK_created
 
 
 @recipe_router.post("/image/{recipe_title}")
@@ -149,7 +148,7 @@ async def upload_image(
     try:
         await image_service.add_image(file_id, f'https://drive.google.com/uc?id={file_id}', recipe_title)
     except AttributeError:
-        raise status_codes.HTTP_404_NOT_FOUND_recipe
+        raise err.HTTP_404_NOT_FOUND_recipe
     return file
 
 
@@ -162,8 +161,8 @@ async def update_recipe(
 ):
     update_recipe = await recipe_service.update_recipe(recipe, recipe_id)
     if not update_recipe:
-        raise status_codes.HTTP_404_NOT_FOUND_recipe
-    return status_codes.HTTP_200_OK_updated
+        raise err.HTTP_404_NOT_FOUND_recipe
+    return msg.HTTP_200_OK_updated
 
 
 @recipe_router.put('/rate/{recipe_title}')
@@ -175,5 +174,5 @@ async def rate_recipe(
 ):
     create_rating = await rating_service.create_rating(rating, user.id, recipe_title)
     if not create_rating:
-        raise status_codes.HTTP_404_NOT_FOUND_recipe
-    return  status_codes.HTTP_200_OK_rating
+        raise err.HTTP_404_NOT_FOUND_recipe
+    return msg.HTTP_200_OK_rating

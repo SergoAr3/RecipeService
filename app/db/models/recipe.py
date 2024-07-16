@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import String, Interval
+from sqlalchemy import Interval, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.db import Base
@@ -16,5 +16,5 @@ class Recipe(Base):
 
     ingredients = relationship("Ingredient", back_populates="recipe", cascade="all, delete-orphan", lazy="selectin")
     steps = relationship("Step", back_populates="recipe", cascade="all, delete-orphan", lazy="selectin")
-    rating = relationship("Rating", back_populates="recipe",  lazy="selectin")
-    image = relationship("Image", back_populates="recipe",  lazy="selectin")
+    rating = relationship("Rating", back_populates="recipe", lazy="selectin")
+    image = relationship("Image", back_populates="recipe", lazy="selectin")

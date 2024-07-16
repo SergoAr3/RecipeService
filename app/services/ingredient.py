@@ -24,4 +24,4 @@ class IngredientService:
         return ingredient
 
     async def create_ingredient(self, ingredient: IngredientCreate, recipe_id: int) -> None:
-        db_ingredient = await self.ingredient_repository.create(ingredient, recipe_id)
+        await self.ingredient_repository.create(ingredient, recipe_id)

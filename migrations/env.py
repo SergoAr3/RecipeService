@@ -1,16 +1,16 @@
 import asyncio
 from logging.config import fileConfig
-
-from sqlalchemy.engine import Connection
-from sqlalchemy import pool
-
 from os import getenv
-from dotenv import load_dotenv
 
 from alembic import context
+from dotenv import load_dotenv
+from sqlalchemy import pool
+from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.db.db import Base
+
+
 # from app.db.models.currency import Base as currencyBase
 # from app.db.models.exchange_rate import Base as exchange_rateBase
 

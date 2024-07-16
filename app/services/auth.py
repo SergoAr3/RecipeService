@@ -1,8 +1,8 @@
 from fastapi import Depends
 
 from app.auth.utils import hash_password
-from app.schemas.user import UserCreate
 from app.repositories.user import UserRepository
+from app.schemas.user import UserCreate
 
 
 class AuthService:

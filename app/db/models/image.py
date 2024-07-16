@@ -10,6 +10,4 @@ class Image(Base):
     url: Mapped[str] = mapped_column(String(255), nullable=True)
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id", ondelete="CASCADE"), nullable=True)
 
-
     recipe = relationship("Recipe", back_populates="image")
-

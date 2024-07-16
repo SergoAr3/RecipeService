@@ -1,10 +1,9 @@
 import datetime
 from typing import List, Literal
 
-from fastapi import Depends, HTTPException
-from starlette import status
+from fastapi import Depends
 
-import app.api.constants.status_codes as status_codes
+import app.api.errors.level_400 as status_codes
 from app.db import Recipe
 from app.repositories.ingredient import IngredientRepository
 from app.repositories.rating import RatingRepository
@@ -41,7 +40,8 @@ class RecipeService:
         recipe = RecipeRead.from_orm(recipe_data)
         return recipe
 
-    async def get_recipes(self, recipes: list[Recipe]) -> list[str]:
+    @staticmethod
+    async def get_recipes(recipes: list[Recipe]) -> list[str]:
         res = []
         for recipe in recipes:
             recipe_data = {
@@ -76,12 +76,11 @@ class RecipeService:
             sort_time: Literal['desc', 'asc'] | None,
             sort_rating: Literal['desc', 'asc'] | None
     ) -> list[str]:
-        recipes_id = []
+        recipes_id = None
         if ingredient_name:
             ingredients = await self.ingredient_repository.get(ingredient_name, by_name=True)
             if ingredients:
-                for ingredient in ingredients:
-                    recipes_id.append(ingredient.recipe_id)
+                recipes_id = [ingredient.recipe_id for ingredient in ingredients]
             else:
                 raise status_codes.HTTP_404_NOT_FOUND_ingredient
 
