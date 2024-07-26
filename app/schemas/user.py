@@ -1,12 +1,9 @@
-from pydantic import BaseModel
+from app.schemas.config import ConfigBaseModel
 
 
-class UserBase(BaseModel):
+class UserBase(ConfigBaseModel):
     username: str
     password: str
-
-    class Config:
-        from_attributes = True
 
 
 class UserRead(UserBase):

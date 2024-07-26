@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from starlette import status
 
-import app.api.errors.level_200 as msg
+import app.api.errors as err
 from app.auth.utils import encode_jwt, validate_auth_user
 from app.schemas.token import Token
 from app.schemas.user import UserCreate
@@ -13,13 +13,14 @@ from app.services.auth import AuthService
 auth_router = APIRouter()
 
 
-@auth_router.post('/register', status_code=status.HTTP_201_CREATED)
+@auth_router.post('/register', status_code=status.HTTP_204_NO_CONTENT)
 async def register(
         user: UserCreate,
         auth_service: Annotated[AuthService, Depends()],
 ):
-    await auth_service.create_user_db(user)
-    return msg.HTTP_200_OK_register
+    reg_user = await auth_service.create_user_db(user)
+    if reg_user is not None:
+        raise err.HTTP_409_CONFLICT_USER_EXISTS
 
 
 @auth_router.post('/login', response_model=Token)

@@ -12,7 +12,8 @@ class Step(Base):
     number: Mapped[int] = mapped_column()
     description: Mapped[str] = mapped_column(String(255))
     step_time: Mapped[datetime.timedelta] = mapped_column(Interval(), default=datetime.timedelta(seconds=0))
-    image_url: Mapped[str] = mapped_column(String(255), nullable=True)
-    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id", ondelete="CASCADE"))
+    image_id: Mapped[str] = mapped_column(String(255), nullable=True)
+    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id", ondelete="CASCADE"), index=True)
 
     recipe = relationship("Recipe", back_populates="steps")
+    image = relationship('ImageStep', back_populates='step')

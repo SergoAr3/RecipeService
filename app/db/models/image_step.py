@@ -4,10 +4,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.db import Base
 
 
-class Image(Base):
-    __tablename__ = "image"
+class ImageStep(Base):
+    __tablename__ = "image_step"
     id: Mapped[str] = mapped_column(String(255), primary_key=True)
     url: Mapped[str] = mapped_column(String(255), nullable=True)
-    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id", ondelete="CASCADE"), nullable=True)
+    step_id: Mapped[str] = mapped_column(ForeignKey('step.id', ondelete="CASCADE", onupdate="CASCADE"))
 
-    recipe = relationship("Recipe", back_populates="image")
+    step = relationship("Step", back_populates="image")

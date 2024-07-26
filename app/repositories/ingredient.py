@@ -1,7 +1,7 @@
 from typing import List
 
 from fastapi import Depends
-from sqlalchemy import select, update
+from sqlalchemy import and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import Ingredient
@@ -43,10 +43,15 @@ class IngredientRepository:
         self.db.add(db_ingredient)
         return db_ingredient
 
-    async def delete(self, ingredient: IngredientCreate) -> None:
+    async def delete(self, ingredient_name: str, recipe_id: int) -> None:
+        ingredient = await self.db.execute(
+            select(Ingredient)
+            .where(and_(Ingredient.recipe_id == recipe_id, Ingredient.name == ingredient_name)))
+        ingredient = ingredient.scalar()
+
         await self.db.delete(ingredient)
 
-    async def update(self, ingredient: IngredientCreate, ingredient_name: str) -> None:
+    async def update(self, ingredient_update_data: dict, recipe_id: int, ingredient_name: str) -> None:
         await self.db.execute(update(Ingredient)
-                              .where(Ingredient.name == ingredient_name)
-                              .values(name=ingredient.name, quantity=ingredient.quantity))
+                              .where(and_(Ingredient.recipe_id == recipe_id, Ingredient.name == ingredient_name))
+                              .values(ingredient_update_data))

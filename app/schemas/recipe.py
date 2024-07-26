@@ -1,21 +1,19 @@
 import datetime
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field, field_serializer
 
+from app.schemas.config import ConfigBaseModel
 from app.schemas.ingredient import IngredientCreate
 from app.schemas.step import StepCreate
 
 
-class RecipeBase(BaseModel):
+class RecipeBase(ConfigBaseModel):
     title: str = Field(description='Название рецепта', example='Овощной салат')
     description: str = Field(description='Описание рецепта',
                              example='Это легкое и освежающее блюдо, состоящее из свежих овощей')
     ingredients: List[IngredientCreate] = Field(description='Список ингредиентов')
     steps: List[StepCreate] = Field(description='Шаги приготовления')
-
-    class Config:
-        from_attributes = True
 
 
 class RecipeRead(RecipeBase):
@@ -40,3 +38,8 @@ class RecipeRead(RecipeBase):
 
 class RecipeCreate(RecipeBase):
     pass
+
+
+class RecipeUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
