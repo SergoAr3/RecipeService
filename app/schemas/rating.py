@@ -1,28 +1,25 @@
-from pydantic import BaseModel
+from pydantic import field_validator
+
+from app.schemas.config import ConfigBaseModel
 
 
-class RatingRead(BaseModel):
+class RatingBase(ConfigBaseModel):
+    rating: float
+
+    @field_validator('rating')
+    @classmethod
+    def validate_rating(cls, value: float):
+        if not value or value < 1 or value > 5:
+            raise ValueError('Оценка должна быть от 1 до 5!')
+        return value
+
+
+class RatingRead(RatingBase):
     id: int
     rating: float
     user_id: str
     recipe_id: int
 
-    class Config:
-        from_attributes = True
 
-    # def __str__(self):
-    #     return (f'Шаг {self.number}: '
-    #             f'{self.description}'
-    #             f'Длительность: {self.step_time}')
-
-
-class RatingCreate(BaseModel):
-    rating: float
-
-    class Config:
-        from_attributes = True
-
-    # def __str__(self):
-    #     return (f'Шаг {self.number}: '
-    #             f'{self.description}'
-    #             f'Длительность: {self.step_time}')
+class RatingCreate(RatingBase):
+    pass

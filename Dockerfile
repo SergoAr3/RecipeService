@@ -6,7 +6,7 @@ COPY requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ../../../recipe_service/recipe_service .
+COPY . .
 
 COPY entrypoint.sh /usr/src/app/entrypoint.sh
 RUN chmod +x /usr/src/app/entrypoint.sh

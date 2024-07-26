@@ -1,28 +1,28 @@
-from pydantic import BaseModel
+from typing import Optional
+
+from pydantic import Field
+
+from app.schemas.config import ConfigBaseModel
 
 
-class IngredientRead(BaseModel):
+class IngredientBase(ConfigBaseModel):
+    name: str = Field(description='Название ингредиента', example='Помидоры')
+    quantity: str = Field(description='Необходимое кол-во ингредиента', example='1кг.')
+
+    def __str__(self):
+        return (f'Ингредиент: {self.name}, '
+                f'Количество: {self.quantity}, '
+                )
+
+
+class IngredientRead(IngredientBase):
     id: int
-    name: str
-    quantity: str
-
-    class Config:
-        from_attributes = True
-
-    def __str__(self):
-        return (f'Ингредиент: {self.name}, '
-                f'Количество: {self.quantity}, '
-                )
 
 
-class IngredientCreate(BaseModel):
-    name: str
-    quantity: str
+class IngredientCreate(IngredientBase):
+    pass
 
-    class Config:
-        from_attributes = True
 
-    def __str__(self):
-        return (f'Ингредиент: {self.name}, '
-                f'Количество: {self.quantity}, '
-                )
+class IngredientUpdate(IngredientBase):
+    name: Optional[str] = None
+    quantity: Optional[str] = None

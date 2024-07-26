@@ -12,9 +12,9 @@ services:
       POSTGRES_PASSWORD: "sergo"
 
   app:
-    build: ../../../recipe_service/recipe_service
+    build: .
     env_file:
-      - ../../../recipe_service/recipe_service/.env
+      - .env
     depends_on:
       - db
     ports:

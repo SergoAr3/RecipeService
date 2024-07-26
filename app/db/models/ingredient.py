@@ -7,8 +7,8 @@ from app.db.db import Base
 class Ingredient(Base):
     __tablename__ = "ingredient"
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String)
-    quantity: Mapped[int] = mapped_column(String)
-    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id", ondelete="CASCADE"))
+    name: Mapped[str] = mapped_column(String(50))
+    quantity: Mapped[int] = mapped_column(String(255))
+    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipe.id", ondelete="CASCADE"), index=True)
 
-    recipe = relationship("Recipe", back_populates="ingredient")
+    recipe = relationship("Recipe", back_populates="ingredients")

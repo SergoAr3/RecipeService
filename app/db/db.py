@@ -1,8 +1,7 @@
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession
-
 from loguru import logger
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession
+from sqlalchemy.orm import DeclarativeBase
 
 from app.db.config import SessionLocal
 
